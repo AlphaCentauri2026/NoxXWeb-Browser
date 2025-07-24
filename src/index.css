@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50;
+}
+
+/* Button hover effects */
+.btn-hover {
+  @apply hover:scale-105 active:scale-95 transition-transform duration-150;
+}
+
+/* Text selection */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+/* Fade in and out animation for welcome tagline */
+.animate-fadeInOut {
+  animation: fadeInOut 3.5s ease-in-out;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Bounce animation for navigation and plus buttons */
+.animate-bounceOnce {
+  animation: bounceOnce 0.3s cubic-bezier(.68,-0.55,.27,1.55);
+}
+@keyframes bounceOnce {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.85); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.slider-glow::-webkit-slider-thumb {
+  box-shadow: 0 0 8px 2px #60a5fa, 0 0 0 4px rgba(96,165,250,0.2);
+  border: 2px solid #60a5fa;
+}
+.slider-glow::-moz-range-thumb {
+  box-shadow: 0 0 8px 2px #60a5fa, 0 0 0 4px rgba(96,165,250,0.2);
+  border: 2px solid #60a5fa;
+}
+.slider-glow::-ms-thumb {
+  box-shadow: 0 0 8px 2px #60a5fa, 0 0 0 4px rgba(96,165,250,0.2);
+  border: 2px solid #60a5fa;
+}
+
+/* Google Custom Search Element Styling */
+.gcse-search {
+  background: transparent !important;
+}
+
+.gsc-control-cse {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.gsc-control-cse .gsc-table-result {
+  background: transparent !important;
+}
+
+.gsc-result {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  margin-bottom: 16px !important;
+  padding: 16px !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.2s ease !important;
+}
+
+.gsc-result:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+.gsc-result .gs-title {
+  color: #ffffff !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  line-height: 1.4 !important;
+}
+
+.gsc-result .gs-title:hover {
+  color: #60a5fa !important;
+}
+
+.gsc-result .gs-snippet {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  margin-top: 8px !important;
+}
+
+.gsc-result .gs-url {
+  color: #60a5fa !important;
+  font-size: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+.gsc-result .gs-url-top {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+.gsc-pagination {
+  margin-top: 24px !important;
+  text-align: center !important;
+}
+
+.gsc-pagination .gsc-cursor {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  padding: 8px 16px !important;
+  margin: 0 4px !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.gsc-pagination .gsc-cursor:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.gsc-pagination .gsc-cursor-current {
+  background: #60a5fa !important;
+  border-color: #60a5fa !important;
+  color: #ffffff !important;
+}
+
+.gsc-no-results-result {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-align: center !important;
+  padding: 32px !important;
+}
+
+.gsc-loading-fade {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Hide default Google branding */
+.gsc-branding {
+  display: none !important;
+}
+
+.gsc-url-top {
+  display: none !important;
+}
+
+/* Custom scrollbar for search results */
+.gsc-control-cse {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.gsc-control-cse::-webkit-scrollbar {
+  width: 6px;
+}
+
+.gsc-control-cse::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gsc-control-cse::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.gsc-control-cse::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
