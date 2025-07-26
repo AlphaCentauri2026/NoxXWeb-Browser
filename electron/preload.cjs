@@ -21,4 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   detachTab: (tabId, url) => ipcRenderer.invoke('detach-tab', tabId, url),
   reattachTab: (tabData) => ipcRenderer.invoke('reattach-tab', tabData),
   onReattachTab: (callback) => ipcRenderer.on('reattach-tab', (event, data) => callback(data)),
+  
+  // History
+  onAddHistoryItem: (callback) => ipcRenderer.on('add-history-item', (event, data) => callback(data)),
 }); 

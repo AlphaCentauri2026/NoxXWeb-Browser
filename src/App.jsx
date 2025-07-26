@@ -2,11 +2,13 @@ import './index.css';
 import { useState, useEffect } from 'react';
 import { TabProvider } from "./context/TabContext";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
+import { HistoryProvider } from "./context/HistoryContext";
 import TabBar from "./components/tabs/TabBar";
 import BrowserWindow from "./components/tabs/BrowserWindow";
 import Navbar from "./components/ui/Navbar";
 import SettingsPanel from "./components/settings/SettingsPanel";
 import ExtensionsPanel from "./components/content/ExtensionsPanel";
+import History from "./components/content/History";
 import PasswordManager from "./components/security/PasswordManager";
 import DeveloperTools from "./components/developer/DeveloperTools";
 import ContentBlocker from "./components/privacy/ContentBlocker";
@@ -19,6 +21,7 @@ function AppContent() {
   const [showPasswordManager, setShowPasswordManager] = useState(false);
   const [showDeveloperTools, setShowDeveloperTools] = useState(false);
   const [showContentBlocker, setShowContentBlocker] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -44,6 +47,7 @@ function AppContent() {
           setShowPasswordManager(false);
           setShowDeveloperTools(false);
           setShowContentBlocker(false);
+          setShowHistory(false);
           break;
         default:
           console.log('Shortcut action:', action);
@@ -125,7 +129,10 @@ function AppContent() {
       <div className="relative z-20 w-full h-full">
         <TabProvider>
           <TabBar />
-          <Navbar openExtensionsPanel={() => setShowExtensions(true)} />
+          <Navbar 
+            openExtensionsPanel={() => setShowExtensions(true)}
+            openHistoryPanel={() => setShowHistory(true)}
+          />
           <BrowserWindow />
           
           {/* Toolbar Buttons */}
@@ -195,6 +202,22 @@ function AppContent() {
             </div>
           )}
           
+          {/* History Panel Modal */}
+          {showHistory && (
+            <div className="fixed inset-0 z-50 animate-fadeIn overflow-y-auto" style={{ maxHeight: '100vh' }}>
+              <div className="relative min-h-screen flex flex-col">
+                <History />
+                <button
+                  onClick={() => setShowHistory(false)}
+                  className="absolute top-4 right-4 w-10 h-10 bg-red-500/20 backdrop-blur-xl border border-red-400/30 rounded-full flex items-center justify-center text-red-200 hover:bg-red-500/30 transition-all duration-200"
+                  title="Close History (Esc)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Password Manager Modal */}
           <PasswordManager 
             isOpen={showPasswordManager} 
@@ -222,7 +245,9 @@ function AppContent() {
 function App() {
   return (
     <SettingsProvider>
-      <AppContent />
+      <HistoryProvider>
+        <AppContent />
+      </HistoryProvider>
     </SettingsProvider>
   );
 }

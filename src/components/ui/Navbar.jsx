@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTabs } from '../../context/TabContext';
 import { MdExtension } from 'react-icons/md';
 
-const Navbar = ({ openExtensionsPanel }) => {
+const Navbar = ({ openExtensionsPanel, openHistoryPanel }) => {
   const { tabs, activeTabId, updateTabUrl, refreshPage, goBack, goForward } = useTabs();
   const [inputUrl, setInputUrl] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -163,7 +163,14 @@ const Navbar = ({ openExtensionsPanel }) => {
       </div>
 
       {/* Right Extensions */}
-      <div className="flex items-center">
+      <div className="flex items-center space-x-2">
+        <button 
+          className="px-3 py-1.5 backdrop-blur-md saturate-180 border border-white/30 rounded-lg text-xs font-medium transition-all duration-200 text-white hover:border-white/50" 
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0)', WebkitBackdropFilter: 'blur(8px) saturate(180%)' }}
+          onClick={openHistoryPanel}
+        >
+          📜 HISTORY
+        </button>
         <button 
           className="px-3 py-1.5 backdrop-blur-md saturate-180 border border-white/30 rounded-lg text-xs font-medium transition-all duration-200 text-white hover:border-white/50" 
           style={{ backgroundColor: 'rgba(255, 255, 255, 0)', WebkitBackdropFilter: 'blur(8px) saturate(180%)' }}

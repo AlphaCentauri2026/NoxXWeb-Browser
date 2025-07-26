@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useTabs } from '../../context/TabContext';
+import { useHistory } from '../../context/HistoryContext';
 import GlassPanel from '../settings/GlassPanel';
 
 const History = () => {
   const { tabs, activeTabId, updateTabUrl } = useTabs();
-  const [history, setHistory] = useState([]);
+  const { 
+    history, 
+    searchHistory, 
+    removeHistoryItem, 
+    removeHistoryItems, 
+    clearHistory, 
+    exportHistory,
+    getHistoryStats,
+    getDomainStats
+  } = useHistory();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [viewMode, setViewMode] = useState('global'); // 'global' or 'tab'
   const [selectedItems, setSelectedItems] = useState([]);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const activeTab = tabs.find(tab => tab.id === activeTabId);
-
-  // Remove mockHistory useEffect
 
   const getTimeAgo = (timestamp) => {
     const now = new Date();
@@ -40,28 +50,21 @@ const History = () => {
   };
 
   const deleteHistoryItem = (id) => {
-    setHistory(prev => prev.filter(item => item.id !== id));
+    removeHistoryItem(id);
   };
 
   const deleteSelectedItems = () => {
-    setHistory(prev => prev.filter(item => !selectedItems.includes(item.id)));
+    removeHistoryItems(selectedItems);
     setSelectedItems([]);
   };
 
   const clearAllHistory = () => {
-    setHistory([]);
+    clearHistory();
     setSelectedItems([]);
   };
 
-  const exportHistory = () => {
-    const dataStr = JSON.stringify(history, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'browser-history.json';
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleExportHistory = (format = 'json') => {
+    exportHistory(format);
   };
 
   const navigateToHistoryItem = (url) => {
@@ -86,27 +89,15 @@ const History = () => {
   };
 
   // Filter history based on search, filter, date, and view mode
-  const filteredHistory = history.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.url.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredHistory = searchHistory(searchTerm).filter(item => {
     const matchesFilter = activeFilter === 'all' || item.tabId === activeFilter;
     const matchesDate = dateFilter === 'all' || getDateCategory(item.timestamp) === dateFilter;
     const matchesView = viewMode === 'global' || item.tabId === activeTabId;
     
-    return matchesSearch && matchesFilter && matchesDate && matchesView;
+    return matchesFilter && matchesDate && matchesView;
   });
 
-  const getStats = () => {
-    const stats = {
-      total: history.length,
-      today: history.filter(item => getDateCategory(item.timestamp) === 'today').length,
-      thisWeek: history.filter(item => getDateCategory(item.timestamp) === 'this-week').length,
-      thisMonth: history.filter(item => getDateCategory(item.timestamp) === 'this-month').length
-    };
-    return stats;
-  };
-
-  const stats = getStats();
+  const stats = getHistoryStats();
 
   const dateFilters = [
     { key: 'all', label: 'All Time' },

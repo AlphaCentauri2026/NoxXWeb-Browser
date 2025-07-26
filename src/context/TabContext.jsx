@@ -52,6 +52,17 @@ export const TabProvider = ({ children }) => {
       window.electronAPI.onTabsUpdated(handleTabsUpdated);
       window.electronAPI.onReattachTab(handleReattachTab);
       
+      // Listen for history updates from Electron
+      if (window.electronAPI.onAddHistoryItem) {
+        const handleAddHistoryItem = (data) => {
+          console.log('📚 Received history item from Electron:', data);
+          // Dispatch event for HistoryContext to listen to
+          const historyEvent = new CustomEvent('addHistoryItem', { detail: data });
+          document.dispatchEvent(historyEvent);
+        };
+        window.electronAPI.onAddHistoryItem(handleAddHistoryItem);
+      }
+      
       // Fallback: If Electron doesn't send initial state within 1 second, create default state
       const fallbackTimeout = setTimeout(() => {
         if (!isInitialized) {

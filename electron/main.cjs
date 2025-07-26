@@ -157,20 +157,32 @@ function createWindow() {
   });
 
   if (isDev) {
-    const tryLoadDevServer = async () => {
+    // Wait for dev server to be ready
+    const waitForDevServer = async () => {
       const ports = [5173, 5174, 5175, 5176, 5177, 3000];
       for (const port of ports) {
         try {
-          await mainWindow.loadURL(`http://localhost:${port}`);
-          console.log(`Connected to dev server on port ${port}`);
-          break;
+          const response = await fetch(`http://localhost:${port}`);
+          if (response.ok) {
+            await mainWindow.loadURL(`http://localhost:${port}`);
+            console.log(`Connected to dev server on port ${port}`);
+            return;
+          }
         } catch (error) {
-          console.log(`Port ${port} not available, trying next...`);
+          // Port not available, continue to next
           continue;
         }
       }
+      // If no port works, try loading anyway (might be starting up)
+      try {
+        await mainWindow.loadURL('http://localhost:5173');
+        console.log('Connected to dev server on port 5173');
+      } catch (error) {
+        console.log('Dev server not ready, retrying in 2 seconds...');
+        setTimeout(waitForDevServer, 2000);
+      }
     };
-    tryLoadDevServer();
+    waitForDevServer();
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
@@ -259,6 +271,24 @@ ipcMain.handle('add-tab', (event, url) => {
   view.webContents.on('page-title-updated', sendTabsUpdate);
   view.webContents.on('did-navigate', sendTabsUpdate);
   view.webContents.on('did-navigate-in-page', sendTabsUpdate);
+  
+  // Listen for page load completion to add to history
+  view.webContents.on('did-finish-load', () => {
+    const url = view.webContents.getURL();
+    const title = view.webContents.getTitle();
+    
+    // Don't add internal pages to history
+    if (url && !url.startsWith('noxx://') && !url.startsWith('chrome://')) {
+      console.log('📚 Adding to history:', { url, title, tabId: id });
+      // Send history update to React
+      mainWindow.webContents.send('add-history-item', {
+        url,
+        title,
+        tabId: id,
+        favicon: null // Could be enhanced to get favicon
+      });
+    }
+  });
   return id;
 });
 
