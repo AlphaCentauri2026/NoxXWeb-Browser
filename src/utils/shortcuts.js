@@ -92,6 +92,10 @@ const defaultShortcuts = {
   'Ctrl+,': { description: 'Open Settings', action: 'openSettings' },
   'F12': { description: 'Developer Tools', action: 'devTools' },
   
+  // Security & Privacy
+  'Ctrl+Shift+p': { description: 'Password Manager', action: 'passwordManager' },
+  'Ctrl+Shift+b': { description: 'Content Blocker', action: 'contentBlocker' },
+  
   // Modals
   'Escape': { description: 'Close Modal/Panel', action: 'closeModal' },
   
@@ -109,7 +113,7 @@ const defaultShortcuts = {
   'Ctrl+Shift+e': { description: 'Open Extensions', action: 'openExtensions' },
   
   // Performance
-  'Ctrl+Shift+p': { description: 'Performance Monitor', action: 'performanceMonitor' },
+  'Ctrl+Shift+m': { description: 'Performance Monitor', action: 'performanceMonitor' },
   
   // Privacy
   'Ctrl+Shift+n': { description: 'New Incognito Window', action: 'incognitoMode' },

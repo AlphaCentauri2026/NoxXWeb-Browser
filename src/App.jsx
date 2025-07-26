@@ -7,12 +7,18 @@ import BrowserWindow from "./components/tabs/BrowserWindow";
 import Navbar from "./components/ui/Navbar";
 import SettingsPanel from "./components/settings/SettingsPanel";
 import ExtensionsPanel from "./components/content/ExtensionsPanel";
+import PasswordManager from "./components/security/PasswordManager";
+import DeveloperTools from "./components/developer/DeveloperTools";
+import ContentBlocker from "./components/privacy/ContentBlocker";
 import shortcuts from "./utils/shortcuts";
-import { FiSettings } from 'react-icons/fi';
+import { FiSettings, FiShield, FiCode, FiEye } from 'react-icons/fi';
 
 function AppContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [showExtensions, setShowExtensions] = useState(false);
+  const [showPasswordManager, setShowPasswordManager] = useState(false);
+  const [showDeveloperTools, setShowDeveloperTools] = useState(false);
+  const [showContentBlocker, setShowContentBlocker] = useState(false);
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -23,9 +29,21 @@ function AppContent() {
         case 'openSettings':
           setShowSettings(true);
           break;
+        case 'devTools':
+          setShowDeveloperTools(true);
+          break;
+        case 'passwordManager':
+          setShowPasswordManager(true);
+          break;
+        case 'contentBlocker':
+          setShowContentBlocker(true);
+          break;
         case 'closeModal':
           setShowSettings(false);
           setShowExtensions(false);
+          setShowPasswordManager(false);
+          setShowDeveloperTools(false);
+          setShowContentBlocker(false);
           break;
         default:
           console.log('Shortcut action:', action);
@@ -109,14 +127,45 @@ function AppContent() {
           <TabBar />
           <Navbar openExtensionsPanel={() => setShowExtensions(true)} />
           <BrowserWindow />
-          {/* Settings Toggle Button */}
-          <button
-            onClick={() => setShowSettings(true)}
-            className="fixed top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all duration-200 z-50"
-            title="Open Settings (Ctrl+,)"
-          >
-            <FiSettings size={28} />
-          </button>
+          
+          {/* Toolbar Buttons */}
+          <div className="fixed top-4 right-4 flex space-x-2 z-50">
+            {/* Password Manager Button */}
+            <button
+              onClick={() => setShowPasswordManager(true)}
+              className="w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all duration-200"
+              title="Password Manager (Ctrl+Shift+P)"
+            >
+              <FiShield size={20} />
+            </button>
+            
+            {/* Developer Tools Button */}
+            <button
+              onClick={() => setShowDeveloperTools(true)}
+              className="w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all duration-200"
+              title="Developer Tools (F12)"
+            >
+              <FiCode size={20} />
+            </button>
+            
+            {/* Content Blocker Button */}
+            <button
+              onClick={() => setShowContentBlocker(true)}
+              className="w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all duration-200"
+              title="Content Blocker (Ctrl+Shift+B)"
+            >
+              <FiEye size={20} />
+            </button>
+            
+            {/* Settings Button */}
+            <button
+              onClick={() => setShowSettings(true)}
+              className="w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all duration-200"
+              title="Open Settings (Ctrl+,)"
+            >
+              <FiSettings size={20} />
+            </button>
+          </div>
           {/* Settings Panel Modal */}
           {showSettings && (
             <div className="fixed inset-0 z-50 animate-fadeIn">
@@ -145,6 +194,25 @@ function AppContent() {
               </div>
             </div>
           )}
+          
+          {/* Password Manager Modal */}
+          <PasswordManager 
+            isOpen={showPasswordManager} 
+            onClose={() => setShowPasswordManager(false)} 
+          />
+          
+          {/* Developer Tools */}
+          <DeveloperTools 
+            isOpen={showDeveloperTools} 
+            onClose={() => setShowDeveloperTools(false)}
+            activeTabId={null}
+          />
+          
+          {/* Content Blocker Modal */}
+          <ContentBlocker 
+            isOpen={showContentBlocker} 
+            onClose={() => setShowContentBlocker(false)} 
+          />
         </TabProvider>
       </div>
     </div>
