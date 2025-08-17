@@ -230,7 +230,7 @@ const DeveloperTools = ({ isOpen, onClose, activeTabId }) => {
             </div>
             <form onSubmit={handleConsoleSubmit} className="p-4 border-t border-gray-700">
               <div className="flex items-center space-x-2">
-                <span className="text-blue-400">></span>
+                <span className="text-blue-400">&gt;</span>
                 <input
                   type="text"
                   value={consoleInput}

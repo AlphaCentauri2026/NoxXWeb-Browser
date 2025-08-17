@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTabs } from '../../context/TabContext';
 import { MdExtension } from 'react-icons/md';
+import { FiClock } from 'react-icons/fi';
 
 const Navbar = ({ openExtensionsPanel, openHistoryPanel }) => {
   const { tabs, activeTabId, updateTabUrl, refreshPage, goBack, goForward } = useTabs();
@@ -169,7 +170,7 @@ const Navbar = ({ openExtensionsPanel, openHistoryPanel }) => {
           style={{ backgroundColor: 'rgba(255, 255, 255, 0)', WebkitBackdropFilter: 'blur(8px) saturate(180%)' }}
           onClick={openHistoryPanel}
         >
-          📜 HISTORY
+          <FiClock className="inline mr-1" size={18} /> HISTORY
         </button>
         <button 
           className="px-3 py-1.5 backdrop-blur-md saturate-180 border border-white/30 rounded-lg text-xs font-medium transition-all duration-200 text-white hover:border-white/50" 

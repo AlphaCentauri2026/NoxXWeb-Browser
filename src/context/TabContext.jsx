@@ -16,7 +16,12 @@ export const TabProvider = ({ children }) => {
 
   // Listen for Electron tab updates
   useEffect(() => {
+    // Check if we're in development mode (running through Vite)
+    const isDevelopment = import.meta.env?.DEV || process.env.NODE_ENV === 'development';
+    
     if (window.electronAPI) {
+      console.log('✅ Electron API available, setting up listeners');
+      
       const handleTabsUpdated = (data) => {
         console.log('🔄 Received tabs update from Electron:', data);
         
@@ -63,7 +68,7 @@ export const TabProvider = ({ children }) => {
         window.electronAPI.onAddHistoryItem(handleAddHistoryItem);
       }
       
-      // Fallback: If Electron doesn't send initial state within 1 second, create default state
+      // Fallback: If Electron doesn't send initial state within 2 seconds, create default state
       const fallbackTimeout = setTimeout(() => {
         if (!isInitialized) {
           console.log('⚠️ Electron initialization timeout, creating fallback state');
@@ -72,7 +77,7 @@ export const TabProvider = ({ children }) => {
           setActiveTabId(fallbackTabId);
           setIsInitialized(true);
         }
-      }, 1000);
+      }, 2000);
       
       // Cleanup
       return () => {
@@ -81,11 +86,86 @@ export const TabProvider = ({ children }) => {
         // This is fine for our use case as the component will unmount
       };
     } else {
-      console.log('⚠️ window.electronAPI not available, creating fallback state immediately');
-      const fallbackTabId = Date.now();
-      setTabs([{ id: fallbackTabId, title: "NoxX Browser", url: "noxx://homepage" }]);
-      setActiveTabId(fallbackTabId);
-      setIsInitialized(true);
+      if (isDevelopment) {
+        console.log('⚠️ window.electronAPI not available in development mode - this is expected when running through Vite');
+        console.log('🔄 Creating development fallback state with mock Electron API');
+        
+        // Create a mock electronAPI for development
+        window.electronAPI = {
+          addTab: async (url) => {
+            console.log('🔄 Mock: Adding tab with URL:', url);
+            const newTabId = Date.now();
+            const newTab = { id: newTabId, title: "New Tab", url };
+            setTabs(prev => [...prev, newTab]);
+            setActiveTabId(newTabId);
+            return newTabId;
+          },
+          switchTab: async (id) => {
+            console.log('🔄 Mock: Switching to tab:', id);
+            setActiveTabId(id);
+          },
+          closeTab: async (id) => {
+            console.log('🔄 Mock: Closing tab:', id);
+            setTabs(prev => prev.filter(tab => tab.id !== id));
+            if (tabs.length > 1) {
+              setActiveTabId(tabs[0]?.id || Date.now());
+            }
+          },
+          updateTabUrl: async (tabId, url) => {
+            console.log('🔄 Mock: Updating tab URL:', tabId, url);
+            setTabs(prev => prev.map(tab => 
+              tab.id === tabId ? { ...tab, url } : tab
+            ));
+          },
+          goBack: async () => console.log('🔄 Mock: Go back'),
+          goForward: async () => console.log('🔄 Mock: Go forward'),
+          refreshPage: async () => console.log('🔄 Mock: Refresh page'),
+          detachTab: async () => console.log('🔄 Mock: Detach tab'),
+          reattachTab: async () => console.log('🔄 Mock: Reattach tab'),
+          getSystemInfo: async () => ({ platform: 'development', arch: 'mock' }),
+          // Permissions API
+          getSitePermissions: async () => ({ 'example.com': { notifications: 'granted' } }),
+          setSitePermission: async (site, permission, status) => {
+            console.log('🔄 Mock: Setting permission:', site, permission, status);
+            return true;
+          },
+          removeSitePermissions: async (site) => {
+            console.log('🔄 Mock: Removing permissions for site:', site);
+            return true;
+          },
+          clearAllPermissions: async () => {
+            console.log('🔄 Mock: Clearing all permissions');
+            return true;
+          },
+          // Event listeners
+          onTabsUpdated: (callback) => console.log('🔄 Mock: onTabsUpdated listener added'),
+          onPerformanceData: (callback) => {
+            console.log('🔄 Mock: onPerformanceData listener added');
+            // Simulate performance data updates
+            setInterval(() => {
+              callback({
+                cpu: { usage: Math.random() * 100, cores: 8 },
+                memory: { total: 16 * 1024 * 1024 * 1024, used: 8 * 1024 * 1024 * 1024, percentage: 50 },
+                timestamp: Date.now()
+              });
+            }, 2000);
+          },
+          onReattachTab: (callback) => console.log('🔄 Mock: onReattachTab listener added'),
+          onAddHistoryItem: (callback) => console.log('🔄 Mock: onAddHistoryItem listener added'),
+        };
+        
+        // Create initial development state
+        const fallbackTabId = Date.now();
+        setTabs([{ id: fallbackTabId, title: "NoxX Browser", url: "noxx://homepage" }]);
+        setActiveTabId(fallbackTabId);
+        setIsInitialized(true);
+      } else {
+        console.log('⚠️ window.electronAPI not available in production mode - this is unexpected');
+        const fallbackTabId = Date.now();
+        setTabs([{ id: fallbackTabId, title: "NoxX Browser", url: "noxx://homepage" }]);
+        setActiveTabId(fallbackTabId);
+        setIsInitialized(true);
+      }
     }
   }, []); // Empty dependency array to run only once
 

@@ -4,8 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cse.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://www.googleapis.com https://www.google.com https://cse.google.com; frame-src 'self' https://www.google.com;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cse.google.com; style-src 'self' 'unsafe-inline'; font-src 'self' data: https:; img-src 'self' data: https:; connect-src 'self' https://www.googleapis.com https://www.google.com https://cse.google.com; frame-src 'self' https://www.google.com;" />
     <title>NoxX Browser</title>
+    <script>
+      // Dynamically adjust CSP for development mode if needed
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // In development mode, we might need to relax CSP for Vite HMR
+        const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        if (meta) {
+          meta.setAttribute('content', meta.getAttribute('content').replace(
+            "script-src 'self' 'unsafe-inline'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+          ));
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

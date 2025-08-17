@@ -145,9 +145,9 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
-      webSecurity: isDev ? false : true, // Disable web security in development for CSE
+      webSecurity: true, // Always enable web security for safety
       preload: path.join(__dirname, 'preload.cjs'),
-      allowRunningInsecureContent: isDev ? true : false, // Allow insecure content in development
+      allowRunningInsecureContent: false, // Never allow insecure content
       experimentalFeatures: false
     },
     titleBarStyle: 'hiddenInset',
@@ -190,6 +190,23 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+  });
+
+  // Global resize handler to update all BrowserViews
+  mainWindow.on('resize', () => {
+    Object.values(tabViews).forEach(view => {
+      if (view._resizeHandler) {
+        view._resizeHandler();
+      }
+    });
+  });
+
+  mainWindow.on('move', () => {
+    Object.values(tabViews).forEach(view => {
+      if (view._resizeHandler) {
+        view._resizeHandler();
+      }
+    });
   });
 
   mainWindow.on('closed', () => {
@@ -246,16 +263,31 @@ ipcMain.handle('add-tab', (event, url) => {
   });
   tabViews[id] = view;
   
-  // Position the BrowserView within the content area
-  const contentArea = {
-    x: 8,  // Small margin from left
-    y: 120, // Below navbar and tabs
-    width: 1264, // Full width minus margins
-    height: 680  // Full height minus margins and navbar
+  // Position the BrowserView within the content area - make it dynamic
+  const updateBrowserViewBounds = () => {
+    const windowBounds = mainWindow.getBounds();
+    const contentArea = {
+      x: 8,  // Small margin from left
+      y: 120, // Below navbar and tabs
+      width: windowBounds.width - 16, // Full width minus margins
+      height: windowBounds.height - 140  // Full height minus margins and navbar
+    };
+    view.setBounds(contentArea);
   };
   
-  view.setBounds(contentArea);
+  // Set initial bounds
+  updateBrowserViewBounds();
+  
+  // Make it responsive to window resizing
   view.setAutoResize({ width: true, height: true });
+  
+  // Listen for window resize events to update bounds
+  const resizeHandler = () => updateBrowserViewBounds();
+  mainWindow.on('resize', resizeHandler);
+  mainWindow.on('move', resizeHandler);
+  
+  // Store the resize handler for cleanup
+  view._resizeHandler = resizeHandler;
   view.webContents.loadURL(url || 'https://www.google.com');
   mainWindow.setBrowserView(view);
   activeTabId = id;
@@ -335,8 +367,23 @@ ipcMain.handle('close-tab', (event, id) => {
   // Remove the tab from tabViews if it exists
   if (tabViews[id]) {
     try {
-      tabViews[id].destroy();
-      console.log('✅ BrowserView destroyed successfully');
+      // Remove from main window first
+      mainWindow.removeBrowserView(tabViews[id]);
+      
+      // Check if destroy method exists and call it
+      if (typeof tabViews[id].destroy === 'function') {
+        tabViews[id].destroy();
+        console.log('✅ BrowserView destroyed successfully');
+      } else {
+        console.log('⚠️ BrowserView destroy method not available, cleaning up manually');
+      }
+      
+      // Clean up resize handlers if they exist
+      if (tabViews[id]._resizeHandler) {
+        mainWindow.removeListener('resize', tabViews[id]._resizeHandler);
+        mainWindow.removeListener('move', tabViews[id]._resizeHandler);
+      }
+      
     } catch (error) {
       console.log('⚠️ Error destroying BrowserView:', error);
     }
@@ -463,17 +510,31 @@ ipcMain.handle('update-tab-url', (event, tabId, url) => {
     });
     tabViews[tabId] = view;
     
-    // Position the BrowserView within the content area (below the navbar and tabs)
-    // Adjust these values to match your NoxX browser layout
-    const contentArea = {
-      x: 8,  // Small margin from left
-      y: 120, // Below navbar and tabs
-      width: 1264, // Full width minus margins
-      height: 680  // Full height minus margins and navbar
+    // Position the BrowserView within the content area - make it dynamic
+    const updateBrowserViewBounds = () => {
+      const windowBounds = mainWindow.getBounds();
+      const contentArea = {
+        x: 8,  // Small margin from left
+        y: 120, // Below navbar and tabs
+        width: windowBounds.width - 16, // Full width minus margins
+        height: windowBounds.height - 140  // Full height minus margins and navbar
+      };
+      view.setBounds(contentArea);
     };
     
-    view.setBounds(contentArea);
+    // Set initial bounds
+    updateBrowserViewBounds();
+    
+    // Make it responsive to window resizing
     view.setAutoResize({ width: true, height: true });
+    
+    // Listen for window resize events to update bounds
+    const resizeHandler = () => updateBrowserViewBounds();
+    mainWindow.on('resize', resizeHandler);
+    mainWindow.on('move', resizeHandler);
+    
+    // Store the resize handler for cleanup
+    view._resizeHandler = resizeHandler;
     
     view.webContents.on('page-title-updated', sendTabsUpdate);
     view.webContents.on('did-navigate', sendTabsUpdate);
@@ -626,15 +687,31 @@ ipcMain.handle('go-forward', (event, tabId) => {
         });
         tabViews[tabId] = view;
         
-        const contentArea = {
-          x: 8,
-          y: 120,
-          width: 1264,
-          height: 680
+        // Position the BrowserView within the content area - make it dynamic
+        const updateBrowserViewBounds = () => {
+          const windowBounds = mainWindow.getBounds();
+          const contentArea = {
+            x: 8,  // Small margin from left
+            y: 120, // Below navbar and tabs
+            width: windowBounds.width - 16, // Full width minus margins
+            height: windowBounds.height - 140  // Full height minus margins and navbar
+          };
+          view.setBounds(contentArea);
         };
         
-        view.setBounds(contentArea);
+        // Set initial bounds
+        updateBrowserViewBounds();
+        
+        // Make it responsive to window resizing
         view.setAutoResize({ width: true, height: true });
+        
+        // Listen for window resize events to update bounds
+        const resizeHandler = () => updateBrowserViewBounds();
+        mainWindow.on('resize', resizeHandler);
+        mainWindow.on('move', resizeHandler);
+        
+        // Store the resize handler for cleanup
+        view._resizeHandler = resizeHandler;
         
         view.webContents.on('page-title-updated', sendTabsUpdate);
         view.webContents.on('did-navigate', sendTabsUpdate);
@@ -690,7 +767,7 @@ ipcMain.handle('detach-tab', (event, tabId, url) => {
       contextIsolation: true,
       enableRemoteModule: false,
       preload: path.join(__dirname, 'preload.cjs'),
-      allowRunningInsecureContent: isDev ? true : false,
+      allowRunningInsecureContent: false, // Never allow insecure content
       experimentalFeatures: false
     },
     titleBarStyle: 'hiddenInset',
@@ -814,16 +891,31 @@ ipcMain.handle('reattach-tab', (event, tabData) => {
     }
   });
 
-  // Position the BrowserView in the main window
-  const contentArea = {
-    x: 8,
-    y: 120,
-    width: 1264,
-    height: 680
+  // Position the BrowserView in the main window - make it dynamic
+  const updateBrowserViewBounds = () => {
+    const windowBounds = mainWindow.getBounds();
+    const contentArea = {
+      x: 8,  // Small margin from left
+      y: 120, // Below navbar and tabs
+      width: windowBounds.width - 16, // Full width minus margins
+      height: windowBounds.height - 140  // Full height minus margins and navbar
+    };
+    newView.setBounds(contentArea);
   };
   
-  newView.setBounds(contentArea);
+  // Set initial bounds
+  updateBrowserViewBounds();
+  
+  // Make it responsive to window resizing
   newView.setAutoResize({ width: true, height: true });
+  
+  // Listen for window resize events to update bounds
+  const resizeHandler = () => updateBrowserViewBounds();
+  mainWindow.on('resize', resizeHandler);
+  mainWindow.on('move', resizeHandler);
+  
+  // Store the resize handler for cleanup
+  newView._resizeHandler = resizeHandler;
   newView.webContents.loadURL(tabData.url);
 
   // Add to tabViews
